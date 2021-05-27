@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>
+  Error
+</h1>
+
+{{ error_msg }}
+<p>
+  <div id="countdown"></div>
+  <progress value="0" max="10" id="progressBar"></progress>
+</p>
+
+<script>
+  /* text count down */
+  var timeleft_txt = 7;
+  var timeleft_bar = timeleft_txt;
+  var timeleftstatic = timeleft_txt;
+  var downloadTimer_txt = setInterval(function(){
+    if(timeleft_txt <= 0){
+      clearInterval(downloadTimer_txt);
+      document.getElementById("countdown").innerHTML = "Redirecting";
+    } else {
+      document.getElementById("countdown").innerHTML = "You will be redirected in " + timeleft_txt + " seconds.";
+    }
+    timeleft_txt -= 1;
+  }, 1000);
+
+  /* progress bar */
+  var downloadTimer_bar = setInterval(function(){
+    if(timeleft_bar <= 0){
+      clearInterval(downloadTimer_bar);
+    }
+    timeleft_bar -= 1;
+    console.log((((timeleftstatic - timeleft_bar)/timeleftstatic)*10));
+    document.getElementById("progressBar").value = (((timeleftstatic - timeleft_bar)/timeleftstatic)*10);
+  }, 1000);
+
+  /* redirect */
+  function redirect(){
+     window.location.href = "/{{ redirect_url }}";
+  }
+  setTimeout(redirect, timeleftstatic *1000 + 2000);
+</script>
+
+{% endblock %}

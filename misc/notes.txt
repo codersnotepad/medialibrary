@@ -1,0 +1,14 @@
+python3 -m venv /Users/timotewb/Development/Python/Django/medialibrary/venv
+
+# in venv
+python -m pip install --upgrade pip
+pip install -r misc/requirements.txt
+
+django-admin startproject ml
+
+python manage.py startapp site_settings ml/apps/site_settings
+python manage.py startapp add_media ml/apps/add_media
+python manage.py startapp site_main ml/apps/site_main
+
+python manage.py makemigrations
+python manage.py migrate

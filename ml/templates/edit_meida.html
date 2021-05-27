@@ -1,0 +1,88 @@
+
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block css %}
+    {{ form_media.css }}
+    <link href="{% static 'image-fullscreen/css/image-fullscreen.css' %}" rel="stylesheet" />
+{% endblock %}
+{% block js %}
+    {{ form_media.js }}
+{% endblock %}
+
+{% block content %}
+<h1>
+  {{ m.name }}
+</h1>
+{% if m %}
+  {% if m.file_type_fk.name == "video" %}
+    <video id="video"  onclick="play();" controls preload="metadata">
+      <source src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" type="video/mp4" />
+    </video>
+  {% elif m.file_type_fk.name == "audio" %}
+    <audio controls>
+      <source src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" type="audio/mpeg">
+      <source src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" type="audio/ogg">
+      <source src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" type="audio/wav">
+    </audio>
+  {% elif m.file_type_fk.name == "image" or m.file_type_fk.name == "image raw" %}
+    <img id="myImg" alt="{{m.name}}" src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" class="img-proxy">
+    <div id="myModal" class="modal">
+      <span class="close">×</span>
+      <img src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" class="modal-content" id="img01">
+      <div id="caption"></div>
+    </div>
+  {% else %}
+    <img src="{% static 'images/file-icons/'|add:m.extension_filtered|add:'.png' %}" height="100">
+  {% endif %}
+{% endif %}
+<p>
+  <h4>Details</h4>
+  <table>
+    <tr>
+      <td>Extension:</td>
+      <td>{{ m.file_extension }}</td>
+      <td>Duration:</td>
+      <td>{{ m.duration_sec }} (sec)</td>
+    </tr>
+    <tr>
+      <td>Width:</td>
+      <td>{{ m.width }}</td>
+      <td>Height:</td>
+      <td>{{ m.height }}</td>
+    </tr>
+    <tr>
+      <td>FPS:</td>
+      <td>{{ m.fps }}</td>
+    </tr>
+    <tr>
+      <td>Project:</td>
+      <td><a href="/project_view/{{ m.project_fk.name }}">{{ m.project_fk.name }}</a></td>
+    </tr>
+  </table>
+</p>
+<p>
+  <form action="{{ form_action }}" method="POST">
+      {% csrf_token %}
+      <table>
+        {{ edit_meida_form.as_table }}
+        <tr>
+          <td></td>
+          <td><input type="submit" value="Update" /></td>
+        </tr>
+      </table>
+  </form>
+</p>
+
+{% if show_update_msg %}
+  <script>
+    alert("Updates saved!");
+  </script>
+{% endif %}
+
+{% endblock %}
+
+{% block end_js %}
+  <script src="{% static 'image-fullscreen/js/image-fullscreen.js' %}"></script>
+{% endblock %}

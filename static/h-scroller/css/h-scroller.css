@@ -1,0 +1,47 @@
+
+.h-scroller {
+    /* max-width: 800px; */
+    margin: auto;
+    padding: 15px;
+    text-align: center;
+    position: relative;
+}
+.h-scroller-carousel {
+    overflow-x: scroll;
+    display: flex;
+    scroll-snap-type: x mandatory;
+}
+.h-scroller-item {
+    width: 430px;
+    padding: 1em;
+}
+@media screen and (max-width: 430px) {
+    .h-scroller-item {
+        padding: 0 30px;
+    }
+}
+
+.h-scroller .btn {
+    position: absolute;
+    top: 30%;
+    margin-top: 20px;
+    height: 30px;
+    width: 30px;
+    border-radius: 15px;
+    background-color: rgba(95, 106, 117, 0.3);
+    z-index: 1;
+    line-height: 30px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+}
+.h-scroller .btn:hover{
+    background-color: rgba(95, 106, 117, 0.5);
+    cursor: pointer;
+}
+.h-scroller .btn.next {
+    right: 15px;
+}
+.h-scroller .btn.prev {
+    left: 15px;
+}

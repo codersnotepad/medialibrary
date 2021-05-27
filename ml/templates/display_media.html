@@ -1,0 +1,126 @@
+{% load static %}
+{% if m.file_type_fk.name == "video" %}
+<div class="media-item">
+  <table>
+    <tr>
+      <td>
+        <a href="/edit_media/{{m.id}}">{{m.name}}</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <video id="video"  onclick="play();" controls preload="metadata">
+          <source src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" type="video/mp4" />
+        </video>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Tags:
+        {% for t in m.tags.all %}
+          <form action="/tag_view/{{ t }}" method="POST" class="tags-form">
+            {% csrf_token %}
+            <button type="submit"  value="{{ t }}">{{ t }}</button>
+          </form>
+        {% endfor %}
+      </td>
+    </tr>
+    <tr>
+      <td>Project: <a href="/project_view/{{ m.project_fk.name }}">{{ m.project_fk.name }}</a></td>
+    </tr>
+  </table>
+  </div>
+{% elif m.file_type_fk.name == "audio" %}
+<div class="media-item">
+  <table>
+    <tr>
+      <td>
+        <a href="/edit_media/{{m.id}}">{{m.name}}</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <audio controls>
+          <source src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" type="audio/mpeg">
+          <source src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" type="audio/ogg">
+          <source src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" type="audio/wav">
+        </audio>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Tags:
+        {% for t in m.tags.all %}
+          <form action="/tag_view/{{ t }}" method="POST" class="tags-form">
+            {% csrf_token %}
+            <button type="submit" value="{{ t }}">{{ t }}</button>
+          </form>
+        {% endfor %}
+      </td>
+    </tr>
+    <tr>
+      <td>Project: <a href="/project_view/{{ m.project_fk.name }}">{{ m.project_fk.name }}</a></td>
+    </tr>
+  </table>
+  </div>
+{% elif m.file_type_fk.name == "image" or m.file_type_fk.name == "image raw" %}
+<div class="media-item">
+  <table>
+    <tr>
+      <td>
+        <a href="/edit_media/{{m.id}}">{{m.name}}</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img alt="{{m.name}}" src="/{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}" class="img-proxy">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Tags:
+        {% for t in m.tags.all %}
+          <form action="/tag_view/{{ t }}" method="POST" class="tags-form">
+            {% csrf_token %}
+            <button type="submit" value="{{ t }}">{{ t }}</button>
+          </form>
+        {% endfor %}
+      </td>
+    </tr>
+    <tr>
+      <td>Project: <a href="/project_view/{{ m.project_fk.name }}">{{ m.project_fk.name }}</a></td>
+    </tr>
+  </table>
+  </div>
+{% else %}
+<div class="media-item">
+  <table>
+    <tr>
+      <td>
+        <a href="/edit_media/{{m.id}}">{{m.name}}</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="other-file">
+          <img src="{% static 'images/file-icons/'|add:m.extension_filtered|add:'.png' %}" height="100">
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Tags:
+        {% for t in m.tags.all %}
+          <form action="/tag_view/{{ t }}" method="POST" class="tags-form">
+            {% csrf_token %}
+            <button type="submit" value="{{ t }}">{{ t }}</button>
+          </form>
+        {% endfor %}
+      </td>
+    </tr>
+    <tr>
+      <td>Project: <a href="/project_view/{{ m.project_fk.name }}">{{ m.project_fk.name }}</a></td>
+    </tr>
+  </table>
+  </div>
+{% endif %}

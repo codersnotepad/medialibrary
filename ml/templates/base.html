@@ -1,0 +1,23 @@
+<!-- templates/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Media Library{% endblock %}</title>
+  <link href="{% static 'css/main.css' %}" rel="stylesheet" />
+  {% block css %}
+  {% endblock %}
+  {% block js %}
+  {% endblock %}
+</head>
+<body>
+    {% include 'navbar.html' %}
+  <main id="main">
+    {% block content %}
+    {% endblock %}
+  </main>
+</body>
+{% block end_js %}
+{% endblock %}
+</html>

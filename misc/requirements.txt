@@ -1,0 +1,7 @@
+Django==3.2.2
+django-tagulous==1.1.0
+rawpy==0.16.0
+opencv-python==4.5.2.52
+audio-metadata==0.11.1
+imageio==2.9.0
+canon-cr3==2019.3.2

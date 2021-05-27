@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# manual add
+.command
+content/
+upload/files/CDNG/
+upload/files/Proxies/
+.DS_Store

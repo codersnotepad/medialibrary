@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>
+  Tag: {{ tag_name }}
+</h2>
+<p>Results: {{ file_count }}</p>
+
+<div class="filter-page">
+  {% for m in tag_files %}
+    {% include 'display_media.html' %}
+  {% endfor %}
+</div>
+
+{% endblock %}

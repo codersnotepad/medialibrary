@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>
+  Project: {{ project_name }}
+</h2>
+<p>Files: {{ file_count }}</p>
+
+<div class="filter-page">
+  {% for m in project_files %}
+    {% include 'display_media.html' %}
+  {% endfor %}
+</div>
+
+{% endblock %}

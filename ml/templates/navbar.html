@@ -1,0 +1,15 @@
+{% url 'sm:index' as index_url %}
+{% url 'am:add_media' as add_media_url %}
+{% url 'ss:settings' as settings_url %}
+
+<div class="navbar">
+  <div class="navbar-item">
+    <a href="{{ index_url }}">Home</a>
+  </div>
+    <div class="navbar-item">
+      <a href="{{ add_media_url }}">Add</a>
+    </div>
+      <div class="navbar-item">
+        <a href="{{ settings_url }}">Settings</a>
+      </div>
+</div>
