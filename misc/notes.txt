@@ -1,9 +1,25 @@
-python3 -m venv /Users/timotewb/Development/Python/Django/medialibrary/venv
+#----------------------------------------------------------------------------------------
+# install instructions
+#----------------------------------------------------------------------------------------
 
-# in venv
+# create venv
+python3 -m venv medialibrary/venv
+
+# install packages
 python -m pip install --upgrade pip
-pip install -r misc/requirements.txt
+pip install -r medialibrary/misc/requirements.txt
 
+# run app in medialibrary dir
+python manage.py migrate
+python manage.py runserver
+
+
+
+
+
+#----------------------------------------------------------------------------------------
+# dev notes
+#----------------------------------------------------------------------------------------
 django-admin startproject ml
 
 python manage.py startapp site_settings ml/apps/site_settings

@@ -13,6 +13,7 @@ from ml.apps.site_settings import models as ss_models
 from ml.apps.add_media import models as am_models
 from django.conf import settings
 import tagulous
+import audio_metadata
 
 settings_data = ss_models.Settings.objects.all().order_by("id")
 
@@ -113,6 +114,44 @@ class HelperTools:
 
         return data
 
+    def get_project_type(self, path):
+        logging.info("HelperTools.get_project_type running with vars:")
+        logging.info("   path:" + path + "\n")
+        """
+        inputs:
+            path - <str>(/path/to/folder) NOT resursive
+        outputs:
+            <str>(video-dls, audio-als)
+        """
+
+        # get dir contents
+        data = self.list_directory_contents(path)
+
+        # define vars
+        proxies_dir = False
+        fullres_dir = False
+        drp_file = False
+        als_file = False
+
+        # collect info on dir contents
+        for file in data["files"]:
+            if file["extension_filtered"] == "drp":
+                drp_file = True
+            elif file["extension_filtered"] == "als":
+                als_file = True
+
+        for folder in data["directories"]:
+            if folder == "FullRes":
+                fullres_dir = True
+            elif folder == "Proxies":
+                proxies_dir = True
+
+        # decide what project type we have
+        if proxies_dir and fullres_dir and drp_file:
+            return "video-drp"
+        elif not proxies_dir and not fullres_dir and als_file:
+            return "audio-als"
+
     # ----------------------------------------------------------------------------------------
     # functions upload data into db
     # ----------------------------------------------------------------------------------------
@@ -190,20 +229,116 @@ class HelperTools:
                     found = True
                     break
             if not found and f["filename"][0] != ".":
-                data.append(
-                    {
-                        "name": f["name"],
-                        "file_name": f["filename"],
-                        "file_location": files_contents["path"],
-                        "file_location_out": s.get("out_root_dir"),
-                        "extension": f["extension"],
-                        "extension_filtered": f["extension_filtered"],
-                        "proxy_file_name": None,
-                        "proxy_file_location": None,
-                        "proxy_file_location_out": None,
-                    }
-                )
+                if f["extension_filtered"] in s.get("video_comp_ext"):
+                    data.append(
+                        {
+                            "name": f["name"],
+                            "file_name": f["filename"],
+                            "file_location": files_contents["path"],
+                            "file_location_out": s.get("out_root_dir"),
+                            "extension": f["extension"],
+                            "extension_filtered": f["extension_filtered"],
+                            "proxy_file_name": f["filename"],
+                            "proxy_file_location": files_contents["path"],
+                            "proxy_file_location_out": s.get("out_root_dir"),
+                        }
+                    )
+                else:
+                    data.append(
+                        {
+                            "name": f["name"],
+                            "file_name": f["filename"],
+                            "file_location": files_contents["path"],
+                            "file_location_out": s.get("out_root_dir"),
+                            "extension": f["extension"],
+                            "extension_filtered": f["extension_filtered"],
+                            "proxy_file_name": None,
+                            "proxy_file_location": None,
+                            "proxy_file_location_out": None,
+                        }
+                    )
 
+        return data
+
+    def create_uploads_video_project(self, path, s):
+
+        # get fullres and proxy files
+        proxies_contents = self.list_directory_contents(
+            os.path.join(path, settings.UPLOAD_PROXIES_NAME)
+        )
+        fullress_contents = self.list_directory_contents(
+            os.path.join(path, settings.UPLOAD_PROJECT_FULLRES_NAME)
+        )
+
+        # match proxy to fullres
+        data = list()
+
+        for f in fullress_contents["files"]:
+            for p in proxies_contents["files"]:
+                if f["name"] == p["name"]:
+                    data.append(
+                        {
+                            "name": f["name"],
+                            "file_name": f["filename"],
+                            "file_location": fullress_contents["path"],
+                            "file_location_out": os.path.join(
+                                s.get("out_root_dir"),
+                                os.path.relpath(
+                                    fullress_contents["path"], s.get("project_dir")
+                                ),
+                            ),
+                            "extension": f["extension"],
+                            "extension_filtered": f["extension_filtered"],
+                            "proxy_file_name": p["filename"],
+                            "proxy_file_location": proxies_contents["path"],
+                            "proxy_file_location_out": os.path.join(
+                                s.get("out_root_dir"),
+                                os.path.relpath(
+                                    proxies_contents["path"], s.get("project_dir")
+                                ),
+                            ),
+                        }
+                    )
+
+        # list all files in project folder
+        all_files = list()
+        for l in os.walk(path):
+            if l[0].find(settings.UPLOAD_PROJECT_FULLRES_NAME) < 0:
+                for filename in l[2]:
+                    add_file = True
+                    for d in data:
+                        if filename == d["file_name"]:
+                            add_file = False
+                    for d in data:
+                        if filename == d["proxy_file_name"]:
+                            add_file = False
+                    if add_file:
+
+                        # define vars
+                        name, extension = os.path.splitext(filename)
+
+                        # add to data list
+                        data.append(
+                            {
+                                "name": name,
+                                "file_name": filename,
+                                "file_location": l[0],
+                                "file_location_out": os.path.join(
+                                    s.get("out_root_dir"),
+                                    os.path.relpath(
+                                        fullress_contents["path"], s.get("project_dir")
+                                    ),
+                                ),
+                                "extension": extension,
+                                "extension_filtered": extension.lower()[1:],
+                                "proxy_file_name": filename,
+                                "proxy_file_location": l[0],
+                                "proxy_file_location_out": os.path.join(
+                                    s.get("out_root_dir"),
+                                    os.path.relpath(l[0], s.get("project_dir")),
+                                ),
+                            }
+                        )
         return data
 
     def upload(self, uploads, s):
@@ -232,6 +367,10 @@ class HelperTools:
                 self.upload_image_raw_file(u, s)
             elif u["extension_filtered"] in s.get("image_comp_ext"):
                 self.upload_image_comp_file(u, s)
+            elif u["extension_filtered"] in s.get("audio_ext"):
+                self.upload_audio_file(u, s)
+            elif u["extension_filtered"] in s.get("other_ext"):
+                self.upload_other_file(u, s)
 
         return True
 
@@ -270,9 +409,11 @@ class HelperTools:
         )
         if s.get("taks_name") == "add_project":
             # check project type exists, create if not
-            pt = check_project_type_exists(s.get("project_type"))
+            pt = self.check_project_type_exists(s.get("project_type"))
             # check project exists, create if not
-            p = check_project_exists(s.get("project_type"), s.get("out_root_dir"), pt)
+            p = self.check_project_exists(
+                s.get("project_name"), s.get("out_root_dir"), pt
+            )
         else:
             pt = None
             p = None
@@ -330,9 +471,11 @@ class HelperTools:
         )
         if s.get("taks_name") == "add_project":
             # check project type exists, create if not
-            pt = check_project_type_exists(s.get("project_type"))
+            pt = self.check_project_type_exists(s.get("project_type"))
             # check project exists, create if not
-            p = check_project_exists(s.get("project_type"), s.get("out_root_dir"), pt)
+            p = self.check_project_exists(
+                s.get("project_name"), s.get("out_root_dir"), pt
+            )
         else:
             pt = None
             p = None
@@ -397,9 +540,11 @@ class HelperTools:
         )
         if s.get("taks_name") == "add_project":
             # check project type exists, create if not
-            pt = check_project_type_exists(s.get("project_type"))
+            pt = self.check_project_type_exists(s.get("project_type"))
             # check project exists, create if not
-            p = check_project_exists(s.get("project_type"), s.get("out_root_dir"), pt)
+            p = self.check_project_exists(
+                s.get("project_name"), s.get("out_root_dir"), pt
+            )
         else:
             pt = None
             p = None
@@ -459,9 +604,11 @@ class HelperTools:
         )
         if s.get("taks_name") == "add_project":
             # check project type exists, create if not
-            pt = check_project_type_exists(s.get("project_type"))
+            pt = self.check_project_type_exists(s.get("project_type"))
             # check project exists, create if not
-            p = check_project_exists(s.get("project_type"), s.get("out_root_dir"), pt)
+            p = self.check_project_exists(
+                s.get("project_name"), s.get("out_root_dir"), pt
+            )
         else:
             pt = None
             p = None
@@ -476,6 +623,121 @@ class HelperTools:
             height=metadata["height"],
             width=metadata["width"],
             channels=metadata["channels"],
+            file_location_fk=flo,
+            file_type_fk=mt,
+            proxy_file_location_fk=pflo,
+            project_fk=p,
+            tags=tagulous.utils.parse_tags(s.get("tags")),
+        )
+        mf.save()
+
+    def upload_audio_file(self, data, s):
+        logging.info("HelperTools.upload_audio_file running.")
+        """
+        inputs:
+            {
+                name: <str>(test_file),
+                file_name: <str>(test_file.TXT),
+                file_location:  <str>(/path/to/file),
+                extension: <str>(.TXT),
+                extension_filtered: <str>(txt),
+                proxy_file_name: <str>(test_file_prx.TXT),
+                proxy_file_location: <str>(/path/to/file),
+             }
+             s - HelperTools.Setup
+        outputs:
+        """
+
+        # get metadata for file
+        metadata = self.get_audio_metadata(
+            os.path.join(data["file_location"], data["file_name"])
+        )
+
+        # check variables exist in db and extract instances
+        mt = self.check_media_type_exists("audio")
+        # check file location out exists, create if not, make path relative when saving
+        flo = self.check_location_exists(
+            os.path.relpath(data["file_location_out"], settings.BASE_DIR)
+        )
+        # check proxy file location out exists, create if not, make path relative when saving
+        pflo = self.check_location_exists(
+            os.path.relpath(data["proxy_file_location_out"], settings.BASE_DIR)
+        )
+        if s.get("taks_name") == "add_project":
+            # check project type exists, create if not
+            pt = self.check_project_type_exists(s.get("project_type"))
+            # check project exists, create if not
+            p = self.check_project_exists(
+                s.get("project_name"), s.get("out_root_dir"), pt
+            )
+        else:
+            pt = None
+            p = None
+
+        # write to db
+        mf = am_models.Media_Fact(
+            name=data["name"],
+            extension_filtered=data["extension_filtered"],
+            file_name=data["file_name"],
+            file_extension=data["extension"],
+            proxy_file_name=data["proxy_file_name"],
+            duration_sec=metadata["duration_sec"],
+            bitrate=metadata["bitrate"],
+            channels=metadata["channels"],
+            sample_rate_hz=metadata["sample_rate_hz"],
+            file_location_fk=flo,
+            file_type_fk=mt,
+            proxy_file_location_fk=pflo,
+            project_fk=p,
+            tags=tagulous.utils.parse_tags(s.get("tags")),
+        )
+        mf.save()
+
+    def upload_other_file(self, data, s):
+        logging.info("HelperTools.upload_other_file running.")
+        """
+        inputs:
+            {
+                name: <str>(test_file),
+                file_name: <str>(test_file.TXT),
+                file_location:  <str>(/path/to/file),
+                extension: <str>(.TXT),
+                extension_filtered: <str>(txt),
+                proxy_file_name: <str>(test_file_prx.TXT),
+                proxy_file_location: <str>(/path/to/file),
+             }
+             s - HelperTools.Setup
+        outputs:
+        """
+
+        # check variables exist in db and extract instances
+        mt = self.check_media_type_exists("other")
+        # check file location out exists, create if not, make path relative when saving
+        flo = self.check_location_exists(
+            os.path.relpath(data["file_location_out"], settings.BASE_DIR)
+        )
+        # check proxy file location out exists, create if not, make path relative when saving
+        pflo = self.check_location_exists(
+            os.path.relpath(data["proxy_file_location_out"], settings.BASE_DIR)
+        )
+        if s.get("taks_name") == "add_project":
+            # check project type exists, create if not
+            pt = self.check_project_type_exists(s.get("project_type"))
+            # check project exists, create if not
+            p = self.check_project_exists(
+                s.get("project_name"), s.get("out_root_dir"), pt
+            )
+        else:
+            pt = None
+            p = None
+
+        # write to db
+        mf = am_models.Media_Fact(
+            name=data["name"],
+            extension_filtered=data["extension_filtered"],
+            file_name=data["file_name"],
+            file_extension=data["extension"],
+            proxy_file_name=data["proxy_file_name"],
             file_location_fk=flo,
             file_type_fk=mt,
             proxy_file_location_fk=pflo,
@@ -640,6 +902,31 @@ class HelperTools:
 
         return data
 
+    def get_audio_metadata(self, in_file):
+        logging.info("HelperTools.get_audio_metadata running.")
+        """
+        inputs:
+                in_file - <str>(/path/to/file/test_file.mp3)
+        outputs:
+            metadata {
+                duration_sec: <int>(120),
+                bitrate:
+                channels:
+                sample_rate_hz:
+            }
+        """
+
+        metadata = audio_metadata.load(in_file)
+
+        data = {
+            "duration_sec": round(metadata["streaminfo"]["duration"]),
+            "bitrate": metadata["streaminfo"]["bitrate"],
+            "channels": metadata["streaminfo"]["channels"],
+            "sample_rate_hz": metadata["streaminfo"]["sample_rate"],
+        }
+
+        return data
+
     # ----------------------------------------------------------------------------------------
     # db functions
     # ----------------------------------------------------------------------------------------
@@ -654,7 +941,7 @@ class HelperTools:
 
         return mtd
 
-    def check_project_type_exists(in_pt):
+    def check_project_type_exists(self, in_pt):
         logging.info("HelperTools.check_project_type_exists running.")
         """
         inputs:
@@ -663,12 +950,12 @@ class HelperTools:
             ml.apps.add_media.models.Project_Type_Dim instance
         """
         # check media location exists, create if not, make path relative when saving
-        l = models.Project_Type_Dim.objects.filter(name=in_pt)
+        l = am_models.Project_Type_Dim.objects.filter(name=in_pt)
         if l.count() <= 0:
-            l = models.Project_Type_Dim(name=in_pt)
+            l = am_models.Project_Type_Dim(name=in_pt)
             l.save()
         else:
-            l = models.Project_Type_Dim.objects.get(name=in_pt)
+            l = am_models.Project_Type_Dim.objects.get(name=in_pt)
 
         return l
 
@@ -682,7 +969,7 @@ class HelperTools:
         outputs:
             ml.apps.add_media.models.Project_Type_Dim instance
         """
-        l = self.check_location_exists(in_dir)
+        l = self.check_location_exists(os.path.relpath(in_dir, settings.BASE_DIR))
         p = am_models.Project_Fact.objects.filter(name=in_name)
         if p.count() <= 0:
             p = am_models.Project_Fact(
@@ -696,15 +983,16 @@ class HelperTools:
 
         return p
 
-    def check_location_exists(self, in_path):
+    def check_location_exists(self, path):
         logging.info("HelperTools.check_location_exists running.")
+        logging.info("   path:" + path + "\n")
         """
         inputs:
-            in_path = <str(/path/to/file)>
+            path = <str(/path/to/file)>
         outputs:
             ml.apps.add_media.models.Location_Fact instance
         """
-        p = pathlib.PureWindowsPath(in_path)
+        p = pathlib.PureWindowsPath(path)
         # check media location exists, create if not, make path relative when saving
         l = am_models.Location_Fact.objects.filter(path=p.as_posix())
         if l.count() <= 0:
@@ -804,7 +1092,10 @@ class HelperTools:
 
         data["proxy_file_name"] = data["name"] + s.get("datetime_suffix") + "_prx.jpg"
         data["proxy_file_location"] = data["file_location"]
-        data["proxy_file_location_out"] = s.get("out_root_dir")
+        data["proxy_file_location_out"] = os.path.join(
+            s.get("out_root_dir"),
+            os.path.relpath(data["file_location"], s.get("project_dir")),
+        )
 
         return data
 
@@ -821,7 +1112,6 @@ class HelperTools:
                 channels: <int>(3)
             }
         """
-        print("change_permissions_recursive", path, mode)
         for root, dirs, files in os.walk(path, topdown=False):
             for dir in [os.path.join(root, d) for d in dirs]:
                 os.chmod(dir, mode)

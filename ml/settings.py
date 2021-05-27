@@ -20,6 +20,7 @@ CONTENT_DIR = os.path.join(BASE_DIR, "content")
 CONTENT_URL = "/content/"
 UPLOAD_DIR = os.path.join(BASE_DIR, "upload")
 UPLOAD_PROJECTS_DIR = os.path.join(UPLOAD_DIR, "projects")
+UPLOAD_PROJECT_FULLRES_NAME = "FullRes"
 
 UPLOAD_PROXIES_NAME = "Proxies"
 UPLOAD_CDNG_NAME = "CDNG"

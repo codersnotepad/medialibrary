@@ -129,8 +129,7 @@ dmypy.json
 .pyre/
 
 # manual add
-.command
-content/
-upload/files/CDNG/
-upload/files/Proxies/
+*.command
+content/*
+upload/*
 .DS_Store
