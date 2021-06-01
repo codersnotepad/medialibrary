@@ -8,9 +8,10 @@
 {% endblock %}
 
 {% block content %}
-<h1>
-  Settings
-</h1>
+  <!-- Page Heading -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+      <h1 class="h3 mb-0 text-gray-800">Settings</h1>
+  </div>
 <p>
   <form action="settings" method="POST">
       {% csrf_token %}
