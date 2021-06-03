@@ -12,9 +12,10 @@
 {% endblock %}
 
 {% block content %}
-<h1>
-  {{ m.name }}
-</h1>
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">{{ m.name }}</h1>
+</div>
+
 {% if m %}
   {% if m.file_type_fk.name == "video" %}
     <video id="video"  onclick="play();" controls preload="metadata">

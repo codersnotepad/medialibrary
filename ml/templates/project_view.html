@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>
-  Project: {{ project_name }}
-</h2>
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Project: {{ project_name }}</h1>
+</div>
+
 <p>Files: {{ file_count }}</p>
 
 <div class="filter-page">
