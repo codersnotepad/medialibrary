@@ -4,7 +4,7 @@ from django.core.cache import cache
 from . import models
 
 
-class AddMediaForm(forms.ModelForm):
+class AddFilesForm(forms.ModelForm):
     class Meta:
         fields = ["tags"]
         model = models.Media_Fact

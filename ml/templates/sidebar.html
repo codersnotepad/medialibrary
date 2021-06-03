@@ -1,5 +1,6 @@
 {% url 'sm:index' as index_url %}
-{% url 'am:add_media' as add_media_url %}
+{% url 'am:add_files' as add_files_url %}
+{% url 'am:add_project' as add_project_url %}
 {% url 'ss:settings' as settings_url %}
 
 <!-- <div class="navbar">
@@ -47,16 +48,16 @@
 
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
-        <a class="nav-link" href="{{ add_media_url }}">
+        <a class="nav-link" href="{{ add_project_url }}">
             <i class="fas fa-fw fa-folder"></i>
             <span>Project</span></a>
     </li>
 
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
-        <a class="nav-link" href="{{ add_media_url }}">
+        <a class="nav-link" href="{{ add_files_url }}">
             <i class="fas fa-fw fa-table"></i>
-            <span>Media</span></a>
+            <span>Files</span></a>
     </li>
 
     <!-- Divider -->

@@ -3,5 +3,6 @@ from . import views
 
 app_name = "am"
 urlpatterns = [
-    path("", views.add_media, name="add_media"),
+    path("/files", views.add_files, name="add_files"),
+    path("/project", views.add_project, name="add_project"),
 ]

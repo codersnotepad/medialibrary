@@ -2,20 +2,20 @@
     display: inline;
 }
 audio {
-  min-width: 350px;
-  max-height: 2000px;
+  min-width: 200px;
+  max-height: 150px;
 }
 video  {
-  min-width: 350px;
-  max-height: 200px;
+  min-width: 200px;
+  max-height: 150px;
 }
 .img-proxy  {
-  min-width: 350px;
-  max-height: 200px;
+  min-width: 200px;
+  max-height: 150px;
 }
 .other-file {
-  min-width: 350px;
-  max-height: 200px;
+  min-width: 200px;
+  max-height: 150px;
 }
 
 /* navbar */

@@ -10,30 +10,13 @@
 {% block content %}
   <!-- Page Heading -->
   <div class="d-sm-flex align-items-center justify-content-between mb-4">
-      <h1 class="h3 mb-0 text-gray-800">Add Media</h1>
+      <h1 class="h3 mb-0 text-gray-800">Add Files</h1>
   </div>
-<h3>Add Project</h3>
 <p>
   <form action="add_media" method="POST">
       {% csrf_token %}
       <table>
-        {{ add_project_form.as_table }}
-        <tr>
-          <td><input type="hidden" name="form_id" value="project" /></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td><input type="submit" value="Add" /></td>
-        </tr>
-      </table>
-  </form>
-</p>
-<h3>Add Files</h3>
-<p>
-  <form action="add_media" method="POST">
-      {% csrf_token %}
-      <table>
-        {{ add_media_form.as_table }}
+        {{ add_files_form.as_table }}
         <tr>
           <td><input type="hidden" name="form_id" value="files" /></td>
         </tr>
