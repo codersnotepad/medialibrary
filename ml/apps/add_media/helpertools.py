@@ -2,6 +2,7 @@
 import os
 import logging
 import datetime
+import pathlib
 import cv2
 import rawpy
 import shutil
@@ -101,9 +102,8 @@ class HelperTools:
         dirs = list()
 
         for dirname in dirnames:
-            # double check it is a file
+            # double check it is a folder
             if os.path.isdir(os.path.join(dirpath, dirname)):
-                name, extension = os.path.splitext(filename)
                 dirs.append(dirname)
 
         data = {
@@ -435,6 +435,7 @@ class HelperTools:
             proxy_file_location_fk=pflo,
             project_fk=p,
             tags=tagulous.utils.parse_tags(s.get("tags")),
+            datetime_created=metadata["date_created"],
         )
         mf.save()
 
@@ -497,6 +498,7 @@ class HelperTools:
             proxy_file_location_fk=pflo,
             project_fk=p,
             tags=tagulous.utils.parse_tags(s.get("tags")),
+            datetime_created=metadata["date_created"],
         )
         mf.save()
 
@@ -564,6 +566,7 @@ class HelperTools:
             proxy_file_location_fk=pflo,
             project_fk=p,
             tags=tagulous.utils.parse_tags(s.get("tags")),
+            datetime_created=metadata["date_created"],
         )
         mf.save()
 
@@ -628,6 +631,7 @@ class HelperTools:
             proxy_file_location_fk=pflo,
             project_fk=p,
             tags=tagulous.utils.parse_tags(s.get("tags")),
+            datetime_created=metadata["date_created"],
         )
         mf.save()
 
@@ -690,6 +694,7 @@ class HelperTools:
             proxy_file_location_fk=pflo,
             project_fk=p,
             tags=tagulous.utils.parse_tags(s.get("tags")),
+            datetime_created=metadata["date_created"],
         )
         mf.save()
 
@@ -731,6 +736,11 @@ class HelperTools:
             pt = None
             p = None
 
+        fname = pathlib.Path(os.path.join(data["file_location"], data["file_name"]))
+        dc_str = datetime.datetime.fromtimestamp(fname.stat().st_ctime).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
         # write to db
         mf = am_models.Media_Fact(
             name=data["name"],
@@ -743,6 +753,7 @@ class HelperTools:
             proxy_file_location_fk=pflo,
             project_fk=p,
             tags=tagulous.utils.parse_tags(s.get("tags")),
+            datetime_created=dc_str,
         )
         mf.save()
 
@@ -751,6 +762,7 @@ class HelperTools:
     # ----------------------------------------------------------------------------------------
     def get_video_metadata(self, in_file):
         logging.info("HelperTools.get_video_metadata running.")
+        logging.info("   in_file:" + in_file + "\n")
         """
         inputs:
             file_path - <str>(/path/to/file/test_file.mp4)
@@ -761,6 +773,7 @@ class HelperTools:
                 duration: <double>(6.01) seconds,
                 height: <int>(1080),
                 width: <int>(1920),
+                date_created: <datetime>(),
             }
         """
         height = 0
@@ -772,12 +785,18 @@ class HelperTools:
         frame_count = round(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         duration = frame_count / fps
 
+        fname = pathlib.Path(in_file)
+        dc_str = datetime.datetime.fromtimestamp(fname.stat().st_ctime).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
         data = {
             "fps": round(fps, 2),
             "frame_count": frame_count,
             "duration": round(duration, 2),
             "height": round(height),
             "width": round(width),
+            "date_created": dc_str,
         }
 
         return data
@@ -802,6 +821,7 @@ class HelperTools:
                 duration: <double>(6.01) seconds,
                 height: <int>(1080),
                 width: <int>(1920),
+                date_created: <datetime>(),
             }
         """
         path = os.path.join(data["file_location"], data["file_name"])
@@ -832,18 +852,25 @@ class HelperTools:
         frame_count = round(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         duration = frame_count / fps
 
+        fname = pathlib.Path(in_file)
+        dc_str = datetime.datetime.fromtimestamp(fname.stat().st_ctime).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
         data = {
             "fps": round(fps, 2),
             "frame_count": frame_count,
             "duration": round(duration, 2),
             "height": round(height),
             "width": round(width),
+            "date_created": dc_str,
         }
 
         return data
 
     def get_image_raw_metadata(self, in_file, extension_filtered):
         logging.info("HelperTools.get_image_raw_metadata running.")
+        logging.info("   in_file:" + in_file + "\n")
         """
         inputs:
                 file_path - <str>(/path/to/file/test_file.cr3)
@@ -851,7 +878,8 @@ class HelperTools:
             metadata {
                 height: <int>(1080),
                 width: <int>(1920),
-                channels: <int>(3)
+                channels: <int>(3),
+                date_created: <datetime>(),
             }
         """
 
@@ -868,16 +896,23 @@ class HelperTools:
             width = rgb.shape[1]
             channels = rgb.shape[2]
 
+        fname = pathlib.Path(in_file)
+        dc_str = datetime.datetime.fromtimestamp(fname.stat().st_ctime).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
         data = {
             "height": height,
             "width": width,
             "channels": channels,
+            "date_created": dc_str,
         }
 
         return data
 
     def get_image_comp_metadata(self, in_file):
         logging.info("HelperTools.get_image_comp_metadata running.")
+        logging.info("   in_file:" + in_file + "\n")
         """
         inputs:
                 file_path - <str>(/path/to/file/test_file.jpg)
@@ -885,7 +920,8 @@ class HelperTools:
             metadata {
                 height: <int>(1080),
                 width: <int>(1920),
-                channels: <int>(3)
+                channels: <int>(3),
+                date_created: <datetime>(),
             }
         """
         img = cv2.imread(in_file, cv2.IMREAD_UNCHANGED)
@@ -894,16 +930,23 @@ class HelperTools:
         width = dim[1]
         channels = dim[2]
 
+        fname = pathlib.Path(in_file)
+        dc_str = datetime.datetime.fromtimestamp(fname.stat().st_ctime).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
         data = {
             "height": height,
             "width": width,
             "channels": channels,
+            "date_created": dc_str,
         }
 
         return data
 
     def get_audio_metadata(self, in_file):
         logging.info("HelperTools.get_audio_metadata running.")
+        logging.info("   in_file:" + in_file + "\n")
         """
         inputs:
                 in_file - <str>(/path/to/file/test_file.mp3)
@@ -913,16 +956,22 @@ class HelperTools:
                 bitrate:
                 channels:
                 sample_rate_hz:
+                date_created: <datetime>(),
             }
         """
 
         metadata = audio_metadata.load(in_file)
+        fname = pathlib.Path(in_file)
+        dc_str = datetime.datetime.fromtimestamp(fname.stat().st_ctime).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
         data = {
             "duration_sec": round(metadata["streaminfo"]["duration"]),
             "bitrate": metadata["streaminfo"]["bitrate"],
             "channels": metadata["streaminfo"]["channels"],
             "sample_rate_hz": metadata["streaminfo"]["sample_rate"],
+            "date_created": dc_str,
         }
 
         return data

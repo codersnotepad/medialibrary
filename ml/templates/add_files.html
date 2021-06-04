@@ -13,7 +13,7 @@
       <h1 class="h3 mb-0 text-gray-800">Add Files</h1>
   </div>
 <p>
-  <form action="add_media" method="POST">
+  <form action="files" method="POST">
       {% csrf_token %}
       <table>
         {{ add_files_form.as_table }}

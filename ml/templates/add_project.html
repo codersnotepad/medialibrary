@@ -13,7 +13,7 @@
       <h1 class="h3 mb-0 text-gray-800">Add Project</h1>
   </div>
 <p>
-  <form action="add_media" method="POST">
+  <form action="project" method="POST">
       {% csrf_token %}
       <table>
         {{ add_project_form.as_table }}

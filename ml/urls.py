@@ -21,6 +21,6 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("settings", include("ml.apps.site_settings.urls")),
-    path("add", include("ml.apps.add_media.urls")),
+    path("add/", include("ml.apps.add_media.urls")),
     path("", include("ml.apps.site_main.urls")),
 ] + static(settings.CONTENT_URL, document_root=settings.CONTENT_DIR)

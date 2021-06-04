@@ -65,4 +65,5 @@ class Media_Fact(models.Model):
         related_name="proxy_file_location",
     )
     project_fk = models.ForeignKey(Project_Fact, on_delete=models.CASCADE, null=True)
+    datetime_created = models.DateTimeField(blank=True)
     datetime_added = models.DateTimeField(auto_now_add=True, blank=True)
