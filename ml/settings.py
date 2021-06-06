@@ -28,6 +28,9 @@ UPLOAD_FILES_DIR = os.path.join(UPLOAD_DIR, "files")
 UPLOAD_FILES_PROXIES_DIR = os.path.join(UPLOAD_FILES_DIR, UPLOAD_PROXIES_NAME)
 UPLOAD_FILES_CDNG_DIR = os.path.join(UPLOAD_FILES_DIR, UPLOAD_CDNG_NAME)
 
+# need to make this a database field
+IGNORE_FILES = [".DS_Store"]
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/

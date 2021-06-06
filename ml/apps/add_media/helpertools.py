@@ -6,6 +6,7 @@ import pathlib
 import cv2
 import rawpy
 import shutil
+import ntpath
 import pathlib
 from canon_cr3 import Image as Image_cr3
 from PIL import Image as Image_pil
@@ -81,8 +82,14 @@ class HelperTools:
                 ]
             }
         """
+
         for (dirpath, dirnames, filenames) in os.walk(path):
             break
+
+        # ignore the "ignore_files" files
+        for ignore_file in settings.IGNORE_FILES:
+            if ignore_file in filenames:
+                filenames.remove(ignore_file)
 
         files = list()
 
@@ -90,6 +97,7 @@ class HelperTools:
             # double check it is a file
             if os.path.isfile(os.path.join(dirpath, filename)):
                 name, extension = os.path.splitext(filename)
+
                 files.append(
                     {
                         "filename": filename,
@@ -105,6 +113,23 @@ class HelperTools:
             # double check it is a folder
             if os.path.isdir(os.path.join(dirpath, dirname)):
                 dirs.append(dirname)
+
+        # CDNG files
+        if (
+            os.path.basename(dirpath) == settings.UPLOAD_PROJECT_FULLRES_NAME
+            and len(dirs) > 0
+            and len(files) == 0
+        ):
+            # we assume the folders are cdng movies
+            for dirname in dirnames:
+                files.append(
+                    {
+                        "filename": dirname,
+                        "name": dirname,
+                        "extension": ".DNG",
+                        "extension_filtered": "cdng",
+                    }
+                )
 
         data = {
             "path": dirpath,
@@ -273,9 +298,12 @@ class HelperTools:
         # match proxy to fullres
         data = list()
 
+        print(fullress_contents["files"])
+        print(proxies_contents["files"])
+
         for f in fullress_contents["files"]:
             for p in proxies_contents["files"]:
-                if f["name"] == p["name"]:
+                if f["name"] == p["name"] or p["name"].startswith(f["name"]):
                     data.append(
                         {
                             "name": f["name"],
@@ -311,6 +339,9 @@ class HelperTools:
                             add_file = False
                     for d in data:
                         if filename == d["proxy_file_name"]:
+                            add_file = False
+                    for ignore_file in settings.IGNORE_FILES:
+                        if filename == ignore_file:
                             add_file = False
                     if add_file:
 
@@ -359,6 +390,14 @@ class HelperTools:
         """
         for u in uploads:
             # upload video files
+            print("##################")
+            print(u["file_name"])
+            print("##################")
+            print()
+            print(u)
+            print()
+            print()
+            print()
             if u["extension_filtered"] in s.get("video_comp_ext"):
                 self.upload_video_comp_file(u, s)
             elif u["extension_filtered"] == "cdng":
@@ -481,11 +520,16 @@ class HelperTools:
             pt = None
             p = None
 
+        # compress folder and tidy up
+        path = os.path.join(data["file_location"], data["file_name"])
+        zip_file = shutil.make_archive(path, "zip", path)
+        shutil.rmtree(path)
+
         # write to db
         mf = am_models.Media_Fact(
             name=data["name"],
             extension_filtered=data["extension_filtered"],
-            file_name=data["file_name"],
+            file_name=ntpath.basename(zip_file),
             file_extension=data["extension"],
             proxy_file_name=data["proxy_file_name"],
             height=metadata["height"],
@@ -830,10 +874,12 @@ class HelperTools:
 
         # find 1 of the data['extension'] (.DNG) files
         for d in os.listdir(path):
-            fn, ext = os.path.splitext(os.path.join(path, d))
-            if ext.upper() == data["extension"]:
-                break
+            for f in os.path.join(path, d):
+                fn, ext = os.path.splitext(os.path.join(path, d, f))
+                if ext.upper() == data["extension"]:
+                    break
         image_fn = os.path.join(path, d)
+        print(image_fn)
 
         # get dimensions from file
         with rawpy.imread(image_fn) as raw:
@@ -841,9 +887,11 @@ class HelperTools:
         height = rgb.shape[0]
         width = rgb.shape[1]
 
-        # compress folder
-        shutil.make_archive(path, "zip", path)
-        shutil.rmtree(path)
+        # get date time created
+        fname = pathlib.Path(image_fn)
+        dc_str = datetime.datetime.fromtimestamp(fname.stat().st_ctime).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
         # get durations from proxy file
         prx_file = os.path.join(data["proxy_file_location"], data["proxy_file_name"])
@@ -851,11 +899,6 @@ class HelperTools:
         fps = cap.get(cv2.CAP_PROP_FPS)
         frame_count = round(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         duration = frame_count / fps
-
-        fname = pathlib.Path(in_file)
-        dc_str = datetime.datetime.fromtimestamp(fname.stat().st_ctime).strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
 
         data = {
             "fps": round(fps, 2),

@@ -7,7 +7,17 @@ from django.conf import settings
 
 
 def add_project(request, ht):
+    logging.info("")
+    logging.info("")
+    logging.info("")
+    logging.info(
+        "----------------------------------------------------------------------------------------"
+    )
     logging.info("Run function add_project()")
+    logging.info(
+        "----------------------------------------------------------------------------------------"
+    )
+    logging.info("")
     """
     inputs:
         ht = HelperTools() instance
@@ -53,7 +63,17 @@ def add_project(request, ht):
 
 
 def add_files(request, ht):
-    logging.info("Run function add_project()")
+    logging.info("")
+    logging.info("")
+    logging.info("")
+    logging.info(
+        "----------------------------------------------------------------------------------------"
+    )
+    logging.info("Run function add_files()")
+    logging.info(
+        "----------------------------------------------------------------------------------------"
+    )
+    logging.info("")
     """
     inputs:
         ht = HelperTools() instance
