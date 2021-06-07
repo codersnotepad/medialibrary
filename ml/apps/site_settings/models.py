@@ -46,6 +46,20 @@ class Other_Ext_Tags(tagulous.models.TagTreeModel):
         blank = True
 
 
+class Ignore_Files_Tags(tagulous.models.TagTreeModel):
+    class TagMeta:
+        space_delimiter = False
+        force_lowercase = False
+        blank = True
+
+
+class Ignore_Folders_Tags(tagulous.models.TagTreeModel):
+    class TagMeta:
+        space_delimiter = False
+        force_lowercase = False
+        blank = True
+
+
 class Settings(models.Model):
     audio_ext = tagulous.models.TagField(
         Audio_Ext_Tags,
@@ -70,4 +84,12 @@ class Settings(models.Model):
     other_ext = tagulous.models.TagField(
         Other_Ext_Tags,
         help_text="List of other file extensions that will be searched for",
+    )
+    ignore_files = tagulous.models.TagField(
+        Ignore_Files_Tags,
+        help_text="List of files to ignore, case sensitive",
+    )
+    ignore_folders = tagulous.models.TagField(
+        Ignore_Folders_Tags,
+        help_text="List of folders to ignore, case sensitive",
     )

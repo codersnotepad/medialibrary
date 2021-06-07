@@ -49,7 +49,7 @@ def add_project(request, ht):
     s.post("out_root_dir", out_root_dir)
 
     # get project project_type
-    s.post("project_type", ht.get_project_type(s.get("project_dir")))
+    s.post("project_type", ht.get_project_type(s.get("project_dir"), s))
 
     if s.get("project_type").startswith("video-"):
         uploads = ht.create_uploads_video_project(s.get("project_dir"), s)
@@ -99,9 +99,9 @@ def add_files(request, ht):
     s.post("project_dir", settings.UPLOAD_FILES_DIR)
 
     # get files list from settings.UPLOAD_FILES_DIR
-    files_contents = ht.list_directory_contents(settings.UPLOAD_FILES_DIR)
-    proxies_contents = ht.list_directory_contents(settings.UPLOAD_FILES_PROXIES_DIR)
-    cdng_contents = ht.list_directory_contents(settings.UPLOAD_FILES_CDNG_DIR)
+    files_contents = ht.list_directory_contents(settings.UPLOAD_FILES_DIR, s)
+    proxies_contents = ht.list_directory_contents(settings.UPLOAD_FILES_PROXIES_DIR, s)
+    cdng_contents = ht.list_directory_contents(settings.UPLOAD_FILES_CDNG_DIR, s)
 
     # for each file match to proxies or cdng creating uploads list
     uploads = ht.create_uploads_files(

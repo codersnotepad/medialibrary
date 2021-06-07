@@ -11,5 +11,7 @@ class SettingsForm(forms.ModelForm):
             "image_comp_ext",
             "image_raw_ext",
             "other_ext",
+            "ignore_files",
+            "ignore_folders",
         ]
         model = models.Settings

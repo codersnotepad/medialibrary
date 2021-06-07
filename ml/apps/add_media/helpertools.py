@@ -46,6 +46,8 @@ class HelperTools:
                 + settings_data[0].image_comp_ext.get_tag_list()
                 + settings_data[0].image_raw_ext.get_tag_list()
                 + settings_data[0].other_ext.get_tag_list(),
+                "ignore_files": settings_data[0].ignore_files.get_tag_list(),
+                "ignore_folders": settings_data[0].ignore_folders.get_tag_list(),
             }
             logging.info("HelperTools.Setup instance defined.")
 
@@ -58,7 +60,7 @@ class HelperTools:
     # ----------------------------------------------------------------------------------------
     # functions to get required info pre upload
     # ----------------------------------------------------------------------------------------
-    def list_directory_contents(self, path):
+    def list_directory_contents(self, path, s):
         logging.info("HelperTools.list_directory_contents running with vars:")
         logging.info("   path:" + path + "\n")
         """
@@ -87,7 +89,7 @@ class HelperTools:
             break
 
         # ignore the "ignore_files" files
-        for ignore_file in settings.IGNORE_FILES:
+        for ignore_file in s.get("ignore_files"):
             if ignore_file in filenames:
                 filenames.remove(ignore_file)
 
@@ -139,7 +141,7 @@ class HelperTools:
 
         return data
 
-    def get_project_type(self, path):
+    def get_project_type(self, path, s):
         logging.info("HelperTools.get_project_type running with vars:")
         logging.info("   path:" + path + "\n")
         """
@@ -150,7 +152,7 @@ class HelperTools:
         """
 
         # get dir contents
-        data = self.list_directory_contents(path)
+        data = self.list_directory_contents(path, s)
 
         # define vars
         proxies_dir = False
@@ -289,10 +291,10 @@ class HelperTools:
 
         # get fullres and proxy files
         proxies_contents = self.list_directory_contents(
-            os.path.join(path, settings.UPLOAD_PROXIES_NAME)
+            os.path.join(path, settings.UPLOAD_PROXIES_NAME), s
         )
         fullress_contents = self.list_directory_contents(
-            os.path.join(path, settings.UPLOAD_PROJECT_FULLRES_NAME)
+            os.path.join(path, settings.UPLOAD_PROJECT_FULLRES_NAME), s
         )
 
         # match proxy to fullres
@@ -340,7 +342,7 @@ class HelperTools:
                     for d in data:
                         if filename == d["proxy_file_name"]:
                             add_file = False
-                    for ignore_file in settings.IGNORE_FILES:
+                    for ignore_file in s.get("ignore_files"):
                         if filename == ignore_file:
                             add_file = False
                     if add_file:
