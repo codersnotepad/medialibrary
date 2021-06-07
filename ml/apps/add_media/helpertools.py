@@ -93,6 +93,12 @@ class HelperTools:
             if ignore_file in filenames:
                 filenames.remove(ignore_file)
 
+        # ignore all files in folder if Path ends in an ignore_folders
+        for ignore_folder in s.get("ignore_folders"):
+            if dirpath.find(ignore_folder) >= 0:
+                filenames = list()
+                break
+
         files = list()
 
         for filename in filenames:
@@ -172,6 +178,11 @@ class HelperTools:
                 fullres_dir = True
             elif folder == "Proxies":
                 proxies_dir = True
+
+        print("proxies_dir", proxies_dir)
+        print("fullres_dir", fullres_dir)
+        print("drp_file", drp_file)
+        print("als_file", als_file)
 
         # decide what project type we have
         if proxies_dir and fullres_dir and drp_file:
@@ -300,9 +311,6 @@ class HelperTools:
         # match proxy to fullres
         data = list()
 
-        print(fullress_contents["files"])
-        print(proxies_contents["files"])
-
         for f in fullress_contents["files"]:
             for p in proxies_contents["files"]:
                 if f["name"] == p["name"] or p["name"].startswith(f["name"]):
@@ -333,7 +341,16 @@ class HelperTools:
         # list all files in project folder
         all_files = list()
         for l in os.walk(path):
-            if l[0].find(settings.UPLOAD_PROJECT_FULLRES_NAME) < 0:
+            print(os.path.basename(l[0]))
+            if os.path.basename(
+                l[0]
+            ) == settings.UPLOAD_PROJECT_FULLRES_NAME or os.path.basename(
+                l[0]
+            ) in s.get(
+                "ignore_folders"
+            ):
+                pass
+            else:
                 for filename in l[2]:
                     add_file = True
                     for d in data:
@@ -881,7 +898,6 @@ class HelperTools:
                 if ext.upper() == data["extension"]:
                     break
         image_fn = os.path.join(path, d)
-        print(image_fn)
 
         # get dimensions from file
         with rawpy.imread(image_fn) as raw:
