@@ -341,13 +341,10 @@ class HelperTools:
         # list all files in project folder
         all_files = list()
         for l in os.walk(path):
-            print(os.path.basename(l[0]))
-            if os.path.basename(
-                l[0]
-            ) == settings.UPLOAD_PROJECT_FULLRES_NAME or os.path.basename(
-                l[0]
-            ) in s.get(
-                "ignore_folders"
+            if (
+                os.path.basename(l[0]) == settings.UPLOAD_PROJECT_FULLRES_NAME
+                or os.path.basename(l[0]) in s.get("ignore_folders")
+                or l[0].find(settings.UPLOAD_PROJECT_FULLRES_NAME) > 0
             ):
                 pass
             else:
