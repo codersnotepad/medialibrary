@@ -889,12 +889,11 @@ class HelperTools:
         width = 0
 
         # find 1 of the data['extension'] (.DNG) files
-        for d in os.listdir(path):
-            for f in os.path.join(path, d):
-                fn, ext = os.path.splitext(os.path.join(path, d, f))
-                if ext.upper() == data["extension"]:
-                    break
-        image_fn = os.path.join(path, d)
+        for f in os.path.join(path):
+            fn, ext = os.path.splitext(os.path.join(path, f))
+            if ext.upper() == data["extension"]:
+                break
+        image_fn = os.path.join(path, f)
 
         # get dimensions from file
         with rawpy.imread(image_fn) as raw:
