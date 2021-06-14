@@ -889,7 +889,7 @@ class HelperTools:
         width = 0
 
         # find 1 of the data['extension'] (.DNG) files
-        for f in os.path.join(path):
+        for f in os.listdir(path):
             fn, ext = os.path.splitext(os.path.join(path, f))
             if ext.upper() == data["extension"]:
                 break
