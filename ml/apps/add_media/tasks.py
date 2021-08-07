@@ -4,6 +4,7 @@ import os
 import shutil
 import re
 from django.conf import settings
+from django.shortcuts import render
 
 
 def add_project(request, ht):
@@ -51,15 +52,27 @@ def add_project(request, ht):
     # get project project_type
     s.post("project_type", ht.get_project_type(s.get("project_dir"), s))
 
+    # create uploads
     if s.get("project_type").startswith("video-"):
         uploads = ht.create_uploads_video_project(s.get("project_dir"), s)
+        try:
+            test_run = ht.upload(uploads, s, test_run=True)
+            continue_run = True
+            logging.info("test_run completed.")
+        except:
+            context = {
+                "error_msg": "Error processng files. Please see command output.",
+            }
+            return render(request, "error_redirect.html", context)
+            continue_run = flase
 
-    # upload files to database
-    results = ht.upload(uploads, s)
+    if continue_run:
+        # upload files to database
+        results = ht.upload(uploads, s)
 
-    # update premissions on source files then move to content
-    ht.change_permissions_recursive(s.get("project_dir"), 0o777)
-    shutil.move(s.get("project_dir"), s.get("out_root_dir"))
+        # update premissions on source files then move to content
+        ht.change_permissions_recursive(s.get("project_dir"), 0o777)
+        shutil.move(s.get("project_dir"), s.get("out_root_dir"))
 
 
 def add_files(request, ht):
@@ -107,14 +120,27 @@ def add_files(request, ht):
     uploads = ht.create_uploads_files(
         files_contents, proxies_contents, cdng_contents, s
     )
+    try:
+        test_run = ht.upload(uploads, s, test_run=True)
+        continue_run = True
+        logging.info("test_run completed.")
+    except:
+        context = {
+            "error_msg": "Error processng files. Please see command output.",
+        }
+        return render(request, "error_redirect.html", context)
+        continue_run = False
 
-    # upload files to database
-    results = ht.upload(uploads, s)
+    logging.info("continue_run")
 
-    # update premissions on source files then move to content
-    ht.change_permissions_recursive(settings.UPLOAD_FILES_DIR, 0o777)
-    shutil.move(settings.UPLOAD_FILES_DIR, s.get("out_root_dir"))
+    if continue_run:
+        # upload files to database
+        results = ht.upload(uploads, s, test_run=False)
 
-    # create files dirs
-    os.makedirs(settings.UPLOAD_FILES_PROXIES_DIR, exist_ok=True)
-    os.makedirs(settings.UPLOAD_FILES_CDNG_DIR, exist_ok=True)
+        # update premissions on source files then move to content
+        ht.change_permissions_recursive(settings.UPLOAD_FILES_DIR, 0o777)
+        shutil.move(settings.UPLOAD_FILES_DIR, s.get("out_root_dir"))
+
+        # create files dirs
+        os.makedirs(settings.UPLOAD_FILES_PROXIES_DIR, exist_ok=True)
+        os.makedirs(settings.UPLOAD_FILES_CDNG_DIR, exist_ok=True)

@@ -388,7 +388,7 @@ class HelperTools:
                         )
         return data
 
-    def upload(self, uploads, s):
+    def upload(self, uploads, s, test_run=False):
         logging.info("HelperTools.upload running.")
         """
         inputs:
@@ -404,6 +404,16 @@ class HelperTools:
             s - HelperTools.Setup()
         outputs:
         """
+
+        if test_run == True:
+            print(
+                "----------------------------------------------------------------------------------------"
+            )
+            print("start test_run")
+            print(
+                "----------------------------------------------------------------------------------------"
+            )
+
         for u in uploads:
             # upload video files
             print("##################")
@@ -415,21 +425,21 @@ class HelperTools:
             print()
             print()
             if u["extension_filtered"] in s.get("video_comp_ext"):
-                self.upload_video_comp_file(u, s)
+                self.upload_video_comp_file(u, s, test_run)
             elif u["extension_filtered"] == "cdng":
-                self.upload_video_cdng_file(u, s)
+                self.upload_video_cdng_file(u, s, test_run)
             elif u["extension_filtered"] in s.get("image_raw_ext"):
-                self.upload_image_raw_file(u, s)
+                self.upload_image_raw_file(u, s, test_run)
             elif u["extension_filtered"] in s.get("image_comp_ext"):
-                self.upload_image_comp_file(u, s)
+                self.upload_image_comp_file(u, s, test_run)
             elif u["extension_filtered"] in s.get("audio_ext"):
-                self.upload_audio_file(u, s)
+                self.upload_audio_file(u, s, test_run)
             elif u["extension_filtered"] in s.get("other_ext"):
-                self.upload_other_file(u, s)
+                self.upload_other_file(u, s, test_run)
 
         return True
 
-    def upload_video_comp_file(self, data, s):
+    def upload_video_comp_file(self, data, s, test_run):
         logging.info("HelperTools.upload_video_comp_file running.")
         """
         inputs:
@@ -473,28 +483,29 @@ class HelperTools:
             pt = None
             p = None
 
-        # write to db
-        mf = am_models.Media_Fact(
-            name=data["name"],
-            extension_filtered=data["extension_filtered"],
-            file_name=data["file_name"],
-            file_extension=data["extension"],
-            proxy_file_name=data["proxy_file_name"],
-            height=metadata["height"],
-            width=metadata["width"],
-            fps=metadata["fps"],
-            frame_count=metadata["fps"],
-            duration_sec=metadata["duration"],
-            file_location_fk=flo,
-            file_type_fk=mt,
-            proxy_file_location_fk=pflo,
-            project_fk=p,
-            tags=tagulous.utils.parse_tags(s.get("tags")),
-            datetime_created=metadata["date_created"],
-        )
-        mf.save()
+        if test_run == False:
+            # write to db
+            mf = am_models.Media_Fact(
+                name=data["name"],
+                extension_filtered=data["extension_filtered"],
+                file_name=data["file_name"],
+                file_extension=data["extension"],
+                proxy_file_name=data["proxy_file_name"],
+                height=metadata["height"],
+                width=metadata["width"],
+                fps=metadata["fps"],
+                frame_count=metadata["fps"],
+                duration_sec=metadata["duration"],
+                file_location_fk=flo,
+                file_type_fk=mt,
+                proxy_file_location_fk=pflo,
+                project_fk=p,
+                tags=tagulous.utils.parse_tags(s.get("tags")),
+                datetime_created=metadata["date_created"],
+            )
+            mf.save()
 
-    def upload_video_cdng_file(self, data, s):
+    def upload_video_cdng_file(self, data, s, test_run):
         logging.info("HelperTools.upload_video_cdng_file running.")
         """
         inputs:
@@ -536,33 +547,34 @@ class HelperTools:
             pt = None
             p = None
 
-        # compress folder and tidy up
-        path = os.path.join(data["file_location"], data["file_name"])
-        zip_file = shutil.make_archive(path, "zip", path)
-        shutil.rmtree(path)
+        if test_run == False:
+            # compress folder and tidy up
+            path = os.path.join(data["file_location"], data["file_name"])
+            zip_file = shutil.make_archive(path, "zip", path)
+            shutil.rmtree(path)
 
-        # write to db
-        mf = am_models.Media_Fact(
-            name=data["name"],
-            extension_filtered=data["extension_filtered"],
-            file_name=ntpath.basename(zip_file),
-            file_extension=data["extension"],
-            proxy_file_name=data["proxy_file_name"],
-            height=metadata["height"],
-            width=metadata["width"],
-            fps=metadata["fps"],
-            frame_count=metadata["fps"],
-            duration_sec=metadata["duration"],
-            file_location_fk=flo,
-            file_type_fk=mt,
-            proxy_file_location_fk=pflo,
-            project_fk=p,
-            tags=tagulous.utils.parse_tags(s.get("tags")),
-            datetime_created=metadata["date_created"],
-        )
-        mf.save()
+            # write to db
+            mf = am_models.Media_Fact(
+                name=data["name"],
+                extension_filtered=data["extension_filtered"],
+                file_name=ntpath.basename(zip_file),
+                file_extension=data["extension"],
+                proxy_file_name=data["proxy_file_name"],
+                height=metadata["height"],
+                width=metadata["width"],
+                fps=metadata["fps"],
+                frame_count=metadata["fps"],
+                duration_sec=metadata["duration"],
+                file_location_fk=flo,
+                file_type_fk=mt,
+                proxy_file_location_fk=pflo,
+                project_fk=p,
+                tags=tagulous.utils.parse_tags(s.get("tags")),
+                datetime_created=metadata["date_created"],
+            )
+            mf.save()
 
-    def upload_image_raw_file(self, data, s):
+    def upload_image_raw_file(self, data, s, test_run):
         logging.info("HelperTools.upload_image_raw_file running.")
         """
         inputs:
@@ -611,26 +623,27 @@ class HelperTools:
             pt = None
             p = None
 
-        # write to db
-        mf = am_models.Media_Fact(
-            name=data["name"],
-            extension_filtered=data["extension_filtered"],
-            file_name=data["file_name"],
-            file_extension=data["extension"],
-            proxy_file_name=data["proxy_file_name"],
-            height=metadata["height"],
-            width=metadata["width"],
-            channels=metadata["channels"],
-            file_location_fk=flo,
-            file_type_fk=mt,
-            proxy_file_location_fk=pflo,
-            project_fk=p,
-            tags=tagulous.utils.parse_tags(s.get("tags")),
-            datetime_created=metadata["date_created"],
-        )
-        mf.save()
+        if test_run == False:
+            # write to db
+            mf = am_models.Media_Fact(
+                name=data["name"],
+                extension_filtered=data["extension_filtered"],
+                file_name=data["file_name"],
+                file_extension=data["extension"],
+                proxy_file_name=data["proxy_file_name"],
+                height=metadata["height"],
+                width=metadata["width"],
+                channels=metadata["channels"],
+                file_location_fk=flo,
+                file_type_fk=mt,
+                proxy_file_location_fk=pflo,
+                project_fk=p,
+                tags=tagulous.utils.parse_tags(s.get("tags")),
+                datetime_created=metadata["date_created"],
+            )
+            mf.save()
 
-    def upload_image_comp_file(self, data, s):
+    def upload_image_comp_file(self, data, s, test_run):
         logging.info("HelperTools.upload_image_comp_file running.")
         """
         inputs:
@@ -676,26 +689,27 @@ class HelperTools:
             pt = None
             p = None
 
-        # write to db
-        mf = am_models.Media_Fact(
-            name=data["name"],
-            extension_filtered=data["extension_filtered"],
-            file_name=data["file_name"],
-            file_extension=data["extension"],
-            proxy_file_name=data["proxy_file_name"],
-            height=metadata["height"],
-            width=metadata["width"],
-            channels=metadata["channels"],
-            file_location_fk=flo,
-            file_type_fk=mt,
-            proxy_file_location_fk=pflo,
-            project_fk=p,
-            tags=tagulous.utils.parse_tags(s.get("tags")),
-            datetime_created=metadata["date_created"],
-        )
-        mf.save()
+        if test_run == False:
+            # write to db
+            mf = am_models.Media_Fact(
+                name=data["name"],
+                extension_filtered=data["extension_filtered"],
+                file_name=data["file_name"],
+                file_extension=data["extension"],
+                proxy_file_name=data["proxy_file_name"],
+                height=metadata["height"],
+                width=metadata["width"],
+                channels=metadata["channels"],
+                file_location_fk=flo,
+                file_type_fk=mt,
+                proxy_file_location_fk=pflo,
+                project_fk=p,
+                tags=tagulous.utils.parse_tags(s.get("tags")),
+                datetime_created=metadata["date_created"],
+            )
+            mf.save()
 
-    def upload_audio_file(self, data, s):
+    def upload_audio_file(self, data, s, test_run):
         logging.info("HelperTools.upload_audio_file running.")
         """
         inputs:
@@ -738,27 +752,28 @@ class HelperTools:
             pt = None
             p = None
 
-        # write to db
-        mf = am_models.Media_Fact(
-            name=data["name"],
-            extension_filtered=data["extension_filtered"],
-            file_name=data["file_name"],
-            file_extension=data["extension"],
-            proxy_file_name=data["proxy_file_name"],
-            duration_sec=metadata["duration_sec"],
-            bitrate=metadata["bitrate"],
-            channels=metadata["channels"],
-            sample_rate_hz=metadata["sample_rate_hz"],
-            file_location_fk=flo,
-            file_type_fk=mt,
-            proxy_file_location_fk=pflo,
-            project_fk=p,
-            tags=tagulous.utils.parse_tags(s.get("tags")),
-            datetime_created=metadata["date_created"],
-        )
-        mf.save()
+        if test_run == False:
+            # write to db
+            mf = am_models.Media_Fact(
+                name=data["name"],
+                extension_filtered=data["extension_filtered"],
+                file_name=data["file_name"],
+                file_extension=data["extension"],
+                proxy_file_name=data["proxy_file_name"],
+                duration_sec=metadata["duration_sec"],
+                bitrate=metadata["bitrate"],
+                channels=metadata["channels"],
+                sample_rate_hz=metadata["sample_rate_hz"],
+                file_location_fk=flo,
+                file_type_fk=mt,
+                proxy_file_location_fk=pflo,
+                project_fk=p,
+                tags=tagulous.utils.parse_tags(s.get("tags")),
+                datetime_created=metadata["date_created"],
+            )
+            mf.save()
 
-    def upload_other_file(self, data, s):
+    def upload_other_file(self, data, s, test_run):
         logging.info("HelperTools.upload_other_file running.")
         """
         inputs:
@@ -801,21 +816,22 @@ class HelperTools:
             "%Y-%m-%d %H:%M:%S"
         )
 
-        # write to db
-        mf = am_models.Media_Fact(
-            name=data["name"],
-            extension_filtered=data["extension_filtered"],
-            file_name=data["file_name"],
-            file_extension=data["extension"],
-            proxy_file_name=data["proxy_file_name"],
-            file_location_fk=flo,
-            file_type_fk=mt,
-            proxy_file_location_fk=pflo,
-            project_fk=p,
-            tags=tagulous.utils.parse_tags(s.get("tags")),
-            datetime_created=dc_str,
-        )
-        mf.save()
+        if test_run == False:
+            # write to db
+            mf = am_models.Media_Fact(
+                name=data["name"],
+                extension_filtered=data["extension_filtered"],
+                file_name=data["file_name"],
+                file_extension=data["extension"],
+                proxy_file_name=data["proxy_file_name"],
+                file_location_fk=flo,
+                file_type_fk=mt,
+                proxy_file_location_fk=pflo,
+                project_fk=p,
+                tags=tagulous.utils.parse_tags(s.get("tags")),
+                datetime_created=dc_str,
+            )
+            mf.save()
 
     # ----------------------------------------------------------------------------------------
     # functions to pull metadata from files
