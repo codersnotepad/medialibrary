@@ -1216,7 +1216,13 @@ class HelperTools:
             )
             im.save(prx_file, quality=70, optimize=True)
 
-        data["proxy_file_name"] = data["name"] + s.get("datetime_suffix") + "_prx.jpg"
+        data["proxy_file_name"] = (
+            data["name"]
+            + s.get("datetime_suffix")
+            + "_"
+            + data["extension_filtered"]
+            + "_prx.jpg"
+        )
         data["proxy_file_location"] = data["file_location"]
         data["proxy_file_location_out"] = os.path.join(
             s.get("out_root_dir"),
