@@ -599,7 +599,7 @@ class HelperTools:
         )
 
         # create proxy image
-        data = self.create_proxy_image(data, s)
+        data = self.create_proxy_image(data, s, test_run)
 
         # check variables exist in db and extract instances
         mt = self.check_media_type_exists("image raw")
