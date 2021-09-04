@@ -436,7 +436,6 @@ class HelperTools:
                 self.upload_audio_file(u, s, test_run)
             elif u["extension_filtered"] in s.get("other_ext"):
                 self.upload_other_file(u, s, test_run)
-
         return True
 
     def upload_video_comp_file(self, data, s, test_run):
@@ -666,7 +665,7 @@ class HelperTools:
         )
 
         # create proxy image
-        data = self.create_proxy_image(data, s)
+        data = self.create_proxy_image(data, s, test_run)
 
         # check variables exist in db and extract instances
         mt = self.check_media_type_exists("image")
@@ -1128,7 +1127,7 @@ class HelperTools:
     # ----------------------------------------------------------------------------------------
     # other functions
     # ----------------------------------------------------------------------------------------
-    def create_proxy_image(self, data, s):
+    def create_proxy_image(self, data, s, test_run):
         logging.info("HelperTools.create_proxy_image running.")
         """
         inputs:
@@ -1161,11 +1160,16 @@ class HelperTools:
         # variables
         in_file = os.path.join(data["file_location"], data["file_name"])
         prx_file = os.path.join(
-            data["file_location"], data["name"] + s.get("datetime_suffix") + "_prx.jpg"
+            data["file_location"],
+            data["name"]
+            + s.get("datetime_suffix")
+            + "_"
+            + data["extension_filtered"]
+            + "_prx.jpg",
         )
 
         # check for raw image file type
-        if data["extension_filtered"] in s.get("image_raw_ext"):
+        if data["extension_filtered"] in s.get("image_raw_ext") and not test_run:
 
             # create proxy for cr3 files
             if data["extension_filtered"] == "cr3":
@@ -1199,7 +1203,7 @@ class HelperTools:
                 raw.close()
 
         # check for comp image files type
-        elif data["extension_filtered"] in s.get("image_comp_ext"):
+        elif data["extension_filtered"] in s.get("image_comp_ext") and not test_run:
             im = Image_pil.open(in_file)
             ratio_ds = im.size[0] / 700
             width_ds = int(im.size[0] / ratio_ds)
