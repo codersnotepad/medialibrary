@@ -48,6 +48,9 @@ class HelperTools:
                 + settings_data[0].other_ext.get_tag_list(),
                 "ignore_files": settings_data[0].ignore_files.get_tag_list(),
                 "ignore_folders": settings_data[0].ignore_folders.get_tag_list(),
+                "ignore_file_prefix": settings_data[
+                    0
+                ].ignore_file_prefix.get_tag_list(),
             }
             logging.info("HelperTools.Setup instance defined.")
 
@@ -92,6 +95,11 @@ class HelperTools:
         for ignore_file in s.get("ignore_files"):
             if ignore_file in filenames:
                 filenames.remove(ignore_file)
+
+        # ignore files if files name has prefix
+        for file in filenames:
+            if file.startswith(tuple(s.get("ignore_file_prefix"))):
+                filenames.remove(file)
 
         # ignore all files in folder if Path ends in an ignore_folders
         for ignore_folder in s.get("ignore_folders"):
@@ -359,6 +367,8 @@ class HelperTools:
                     for ignore_file in s.get("ignore_files"):
                         if filename == ignore_file:
                             add_file = False
+                    if filename.startswith(tuple(s.get("ignore_file_prefix"))):
+                        add_file = False
                     if add_file:
 
                         # define vars

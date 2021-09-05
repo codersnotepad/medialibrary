@@ -53,6 +53,13 @@ class Ignore_Files_Tags(tagulous.models.TagTreeModel):
         blank = True
 
 
+class Ignore_Files_Prefix_Tags(tagulous.models.TagTreeModel):
+    class TagMeta:
+        space_delimiter = False
+        force_lowercase = False
+        blank = True
+
+
 class Ignore_Folders_Tags(tagulous.models.TagTreeModel):
     class TagMeta:
         space_delimiter = False
@@ -92,4 +99,8 @@ class Settings(models.Model):
     ignore_folders = tagulous.models.TagField(
         Ignore_Folders_Tags,
         help_text="List of folders to ignore, case sensitive",
+    )
+    ignore_file_prefix = tagulous.models.TagField(
+        Ignore_Files_Prefix_Tags,
+        help_text="List of file prefixes to ignore, case sensitive",
     )

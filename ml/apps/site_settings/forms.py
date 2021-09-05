@@ -13,5 +13,6 @@ class SettingsForm(forms.ModelForm):
             "other_ext",
             "ignore_files",
             "ignore_folders",
+            "ignore_file_prefix",
         ]
         model = models.Settings
