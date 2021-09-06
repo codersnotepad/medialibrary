@@ -17,8 +17,6 @@ from django.conf import settings
 import tagulous
 import audio_metadata
 
-#test comment
-
 settings_data = ss_models.Settings.objects.all().order_by("id")
 
 
