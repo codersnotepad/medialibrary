@@ -3,6 +3,9 @@
 #----------------------------------------------------------------------------------------
 
 # create venv
+mkdir venv
+mkdir -p upload/projects
+mkdir -p upload/files
 python3 -m venv medialibrary/venv
 
 # install packages
