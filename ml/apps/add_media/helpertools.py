@@ -383,7 +383,7 @@ class HelperTools:
                                 "file_location_out": os.path.join(
                                     s.get("out_root_dir"),
                                     os.path.relpath(
-                                        fullress_contents["path"], s.get("project_dir")
+                                        l[0], s.get("project_dir")
                                     ),
                                 ),
                                 "extension": extension,

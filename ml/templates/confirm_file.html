@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block css %}
+    {{ form_media.css }}
+{% endblock %}
+{% block js %}
+    {{ form_media.js }}
+{% endblock %}
+
+{% block content %}
+  <!-- Page Heading -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+      <h1 class="h3 mb-0 text-gray-800">Confirm</h1>
+  </div>
+<p>
+  Click button below to delete file(s) associated with "{{m.name}}"".<br>
+  /{{m.proxy_file_location_fk.path}}/{{m.proxy_file_name}}<br>
+  /{{m.file_location_fk.path}}/{{m.file_name}}
+
+</p>
+<p>
+  <form action="{{ form_action }}" method="POST">
+      {% csrf_token %}
+      <table>
+        <tr>
+          <td><input type="submit" value="Delete" /></td>
+        </tr>
+      </table>
+  </form>
+</p>
+
+{% endblock %}

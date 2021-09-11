@@ -13,4 +13,20 @@
   {% endfor %}
 </div>
 
+<hr>
+<p>
+  <h4>Warning</h4>
+  Click the below button to delete the file.
+</p>
+<p>
+  <form action="{{ form_action_delete }}" method="POST">
+      {% csrf_token %}
+      <table>
+        <tr>
+          <td><input type="submit" value="Delete" /></td>
+        </tr>
+      </table>
+  </form>
+</p>
+
 {% endblock %}

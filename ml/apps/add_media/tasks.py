@@ -60,11 +60,11 @@ def add_project(request, ht):
             continue_run = True
             logging.info("test_run completed.")
         except:
+            continue_run = False
             context = {
                 "error_msg": "Error processng files. Please see command output.",
             }
             return render(request, "error_redirect.html", context)
-            continue_run = flase
 
     if continue_run:
         # upload files to database
